@@ -12,7 +12,7 @@ mod schema {
 }
 
 use schema::tasks;
-use schema::tasks::dsl::{tasks as all_tasks, completed as task_completed};
+use schema::tasks::dsl::{tasks as all_tasks};
 
 use crate::DbConn;
 
