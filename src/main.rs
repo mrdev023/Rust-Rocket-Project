@@ -18,9 +18,9 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     rocket
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build()
+#[rocket::main]
+async fn main() {
+    let rocket_builder = rocket::build()
         .mount("/", routes![
             controllers::tasks_controller::index_template
         ])
@@ -37,5 +37,11 @@ fn rocket() -> _ {
         ])
         .attach(DbConn::fairing())
         .attach(Template::fairing())
-        .attach(AdHoc::on_ignite("Run Migrations", run_migrations))
+        .attach(AdHoc::on_ignite("Run Migrations", run_migrations));
+
+    if let Err(e) = rocket_builder.launch().await {
+        println!("Whoops! Rocket didn't launch!");
+        // We drop the error to get a Rocket-formatted panic.
+        drop(e);
+    };
 }
