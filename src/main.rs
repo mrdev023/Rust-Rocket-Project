@@ -22,7 +22,11 @@ fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![
             controllers::index,
-            controllers::tasks_controller::show
+            controllers::tasks_controller::index,
+            controllers::tasks_controller::show,
+            controllers::tasks_controller::create,
+            controllers::tasks_controller::update,
+            controllers::tasks_controller::delete
         ])
         .attach(DbConn::fairing())
         .attach(AdHoc::on_ignite("Run Migrations", run_migrations))
