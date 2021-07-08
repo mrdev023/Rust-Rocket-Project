@@ -7,6 +7,7 @@ mod controllers;
 use rocket::*;
 use rocket::fairing::AdHoc;
 use models::DbConn;
+use rocket_dyn_templates::Template;
 
 async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     embed_migrations!();
@@ -21,6 +22,9 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![
+            controllers::tasks_controller::index_template
+        ])
+        .mount("/api/", routes![
             controllers::index,
             controllers::tasks_controller::index,
             controllers::tasks_controller::show,
@@ -28,6 +32,10 @@ fn rocket() -> _ {
             controllers::tasks_controller::update,
             controllers::tasks_controller::delete
         ])
+        .register("/", catchers![
+            controllers::not_found
+        ])
         .attach(DbConn::fairing())
+        .attach(Template::fairing())
         .attach(AdHoc::on_ignite("Run Migrations", run_migrations))
 }

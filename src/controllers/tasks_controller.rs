@@ -1,6 +1,22 @@
-use rocket::serde::json::Json;
+use rocket::serde::{json::Json, Serialize};
 use rocket::{get, post, patch, delete};
 use crate::models::{DbConn, task::Task};
+use rocket_dyn_templates::{Template};
+
+#[get("/")]
+pub async fn index_template(conn: DbConn) -> Template {
+    #[derive(Serialize, Debug)]
+    #[serde(crate = "rocket::serde")]
+    struct Data {
+        title: String,
+        tasks: Vec<Task>
+    }
+
+    Template::render("tasks/index", Data {
+        title: "Hello".to_string(),
+        tasks: Task::all(&conn).await.unwrap(),
+    })
+}
 
 #[get("/tasks")]
 pub async fn index(conn: DbConn) -> Option<Json<Vec<Task>>> {
