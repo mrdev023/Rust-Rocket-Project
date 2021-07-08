@@ -1,17 +1,14 @@
 use rocket::serde::Serialize;
 use diesel::{self, result::QueryResult, Queryable, Insertable, prelude::*};
+use super::DbConn;
 
 table! {
-    tasks {
+    tasks (id) {
         id -> Nullable<Integer>,
         description -> Text,
         completed -> Bool,
     }
 }
-
-use tasks::dsl::{tasks as all_tasks};
-
-use crate::DbConn;
 
 #[derive(Serialize, Queryable, Insertable, Debug, Clone)]
 #[serde(crate = "rocket::serde")]
@@ -24,8 +21,16 @@ pub struct Task {
 
 impl Task {
     pub async fn all(conn: &DbConn) -> QueryResult<Vec<Task>> {
-        conn.run(|c| {
-            all_tasks.order(tasks::id.desc()).load::<Task>(c)
+        conn.run(move |c| {
+            tasks::table.load(c)
+        }).await
+    }
+
+    pub async fn find_by(conn: &DbConn, id: i32) -> QueryResult<Task> {
+        conn.run(move |c| {
+            tasks::table
+                .filter(tasks::id.eq(id))
+                .first(c)
         }).await
     }
 }

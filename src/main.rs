@@ -2,24 +2,11 @@
 #[macro_use] extern crate diesel_migrations;
 
 mod models;
+mod controllers;
 
 use rocket::*;
 use rocket::fairing::AdHoc;
-use rocket_sync_db_pools::{database};
-
-#[database("sqlite_logs")]
-pub struct DbConn(diesel::SqliteConnection);
-
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
-}
-
-#[get("/log/<id>")]
-async fn get_log(conn: DbConn, id: i32) -> String {
-    let result = models::task::Task::all(&conn).await;
-    format!("test {}, {:?}", id, result)
-}
+use models::DbConn;
 
 async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     embed_migrations!();
@@ -33,7 +20,10 @@ async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, get_log])
+        .mount("/", routes![
+            controllers::index,
+            controllers::tasks_controller::show
+        ])
         .attach(DbConn::fairing())
         .attach(AdHoc::on_ignite("Run Migrations", run_migrations))
 }
