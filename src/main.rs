@@ -1,11 +1,11 @@
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_migrations;
 
+mod models;
+
 use rocket::*;
 use rocket::fairing::AdHoc;
 use rocket_sync_db_pools::{database};
-
-mod task;
 
 #[database("sqlite_logs")]
 pub struct DbConn(diesel::SqliteConnection);
@@ -17,7 +17,7 @@ fn index() -> &'static str {
 
 #[get("/log/<id>")]
 async fn get_log(conn: DbConn, id: i32) -> String {
-    let result = task::Task::all(&conn).await;
+    let result = models::task::Task::all(&conn).await;
     format!("test {}, {:?}", id, result)
 }
 

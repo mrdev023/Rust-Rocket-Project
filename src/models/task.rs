@@ -1,18 +1,15 @@
 use rocket::serde::Serialize;
 use diesel::{self, result::QueryResult, Queryable, Insertable, prelude::*};
 
-mod schema {
-    table! {
-        tasks {
-            id -> Nullable<Integer>,
-            description -> Text,
-            completed -> Bool,
-        }
+table! {
+    tasks {
+        id -> Nullable<Integer>,
+        description -> Text,
+        completed -> Bool,
     }
 }
 
-use schema::tasks;
-use schema::tasks::dsl::{tasks as all_tasks};
+use tasks::dsl::{tasks as all_tasks};
 
 use crate::DbConn;
 
